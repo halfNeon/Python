@@ -1,0 +1,179 @@
+import pandas as pd
+df = pd.read_csv('/content/Country_data.csv')
+df.head()
+df.describe()
+df['child_mort'].isnull().sum()
+df.info()
+
+df = df.drop('country',axis=1)
+df.corr()
+
+import seaborn as sns
+sns.heatmap(df.corr(), annot = True, cmap = 'viridis')
+import plotly.express as exp
+exp.histogram(data_frame=df, x='gdpp',nbins=167, opacity=0.75, barmode='overlay')
+df['child_mort'].mean()
+df['child_mort'].max()
+df.drop('gdpp', axis=1)
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+scaled_data = scaler.fit_transform(df.drop('gdpp',axis=1))
+scaled_data
+df.drop('gdpp', axis=1).columns
+data = pd.DataFrame(scaled_data, columns=df.drop('gdpp',axis=1).columns)
+df.head()
+data['gdpp'] = df['gdpp']
+data.head()
+exp.histogram(data_frame=data, x='gdpp',nbins=167, opacity=0.75, barmode='overlay')
+exp.histogram(data_frame=df, x='gdpp',nbins=167, opacity=0.75, barmode='overlay')
+import matplotlib.pyplot as plt
+exp.scatter(data_frame=df, x='child_mort', y='income', color='gdpp')
+from sklearn.cluster import KMeans
+k_means = KMeans(n_clusters=5)
+k_means.fit(data.drop('gdpp',axis=1))
+k_means.labels_
+k_means.inertia_
+
+k_means= KMeans(n_clusters=4)
+k_means.fit(data.drop('gdpp',axis=1))
+k_means.labels_
+
+k_means.inertia_
+
+K = range(1,10)
+ssd = []
+for k in K:
+  k_means = KMeans(n_clusters=k)
+  k_means.fit(data.drop('gdpp',axis=1))
+  ssd.append(k_means.inertia_)
+
+ssd
+
+plt.figure(figsize=(10,5))
+plt.plot(K, ssd, 'bx-')
+plt.xlabel('k')
+plt.ylabel('ssd')
+plt.title('elbow method for optimal K')
+plt.show()
+
+plt.figure(figsize=(10,6))
+plt.plot(K, ssd, 'ro-.')
+plt.xlabel('k')
+plt.ylabel('ssd')
+plt.title('elbow method for optimal K')
+plt.show()
+
+k_means = KMeans(n_clusters=4)
+k_means.fit(data.drop('gdpp',axis=1))
+pred = k_means.predict(data.drop('gdpp',axis=1))
+
+k_means = KMeans(n_clusters=3)
+k_means.fit(data.drop('gdpp',axis=1))
+pred = k_means.labels_
+
+exp.scatter(data_frame=data, x='child_mort', y='income', color=pred)
+
+
+Conclusion:
+The elbow methods shows that K=3 is the optimum value of K. The output image shows the three 
+different clusters, of countries based on the data, with different colors.
+
+====================================================================================================================
+
+
+Program 1: K-Means Clustering with Elbow Method
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler
+import plotly.express as exp
+
+# Load the dataset
+df = pd.read_csv('/content/Country_data.csv')
+
+# Drop the 'country' column
+df = df.drop('country', axis=1)
+
+# Scale the features (excluding 'gdpp') using Min-Max scaling
+scaler = MinMaxScaler()
+scaled_data = scaler.fit_transform(df.drop('gdpp', axis=1))
+data = pd.DataFrame(scaled_data, columns=df.drop('gdpp', axis=1).columns)
+
+# Add the 'gdpp' column back to the scaled data
+data['gdpp'] = df['gdpp']
+
+# Calculate the Within-Cluster Sum of Squares (WCSS) for different values of K
+K_values = range(1, 10)
+wcss = []
+for k in K_values:
+    kmeans = KMeans(n_clusters=k)
+    kmeans.fit(data.drop('gdpp', axis=1))
+    wcss.append(kmeans.inertia_)
+
+# Plot the WCSS values to find the elbow point
+plt.figure(figsize=(10, 6))
+plt.plot(K_values, wcss, 'bx-')
+plt.xlabel('Number of Clusters (K)')
+plt.ylabel('WCSS')
+plt.title('Elbow Method for Optimal K')
+plt.show()
+
+# Based on the plot, choose the optimal value of K (usually where the curve starts to flatten)
+optimal_k = 3
+print(f"Optimal value of K: {optimal_k}")
+
+# Perform K-Means clustering with the chosen K value
+kmeans = KMeans(n_clusters=optimal_k)
+kmeans.fit(data.drop('gdpp', axis=1))
+cluster_labels = kmeans.labels_
+
+# Visualize the clusters
+exp.scatter(data_frame=data, x='child_mort', y='income', color=cluster_labels)
+
+====================================================================================
+
+Program 2: Correlation Matrix and Histograms
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import plotly.express as exp
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.cluster import KMeans
+
+# Load the dataset
+df = pd.read_csv('/content/Country_data.csv')
+
+# Drop the 'country' column
+df = df.drop('country', axis=1)
+
+# Calculate the correlation matrix
+correlation_matrix = df.corr()
+
+# Visualize the correlation matrix using a heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(correlation_matrix, annot=True, cmap='viridis')
+plt.title('Correlation Matrix')
+plt.show()
+
+# Scale the features (excluding 'gdpp') using Min-Max scaling
+scaler = MinMaxScaler()
+scaled_data = scaler.fit_transform(df.drop('gdpp', axis=1))
+data = pd.DataFrame(scaled_data, columns=df.drop('gdpp', axis=1).columns)
+
+# Add the 'gdpp' column back to the scaled data
+data['gdpp'] = df['gdpp']
+
+# Create histograms for the 'gdpp' feature
+exp.histogram(data_frame=data, x='gdpp', nbins=167, opacity=0.75, barmode='overlay')
+
+# Perform K-Means clustering with K=3
+k_means = KMeans(n_clusters=3)
+k_means.fit(data.drop('gdpp', axis=1))
+pred = k_means.labels_
+
+# Visualize the clusters using a scatter plot
+exp.scatter(data_frame=data, x='child_mort', y='income', color=pred)
